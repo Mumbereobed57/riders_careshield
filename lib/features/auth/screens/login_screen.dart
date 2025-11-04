@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants.dart';
+import '../../../core/theme.dart';
 import '../../../core/widgets/custom_button.dart';
 import '../providers/auth_provider.dart';
 import '../../dashboard/screens/home_screen.dart';
@@ -64,6 +66,9 @@ class _LoginScreenState extends State<LoginScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
+        systemOverlayStyle: getSystemUiOverlayStyle(
+          statusBarColor: AppColors.background,
+        ),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back, color: AppColors.text),
           onPressed: () => Navigator.pop(context),
@@ -177,9 +182,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     Text(
                       "Don't have an account? ",
-                      style: TextStyle(
-                        color: AppColors.text.withOpacity(0.6),
-                      ),
+                      style: TextStyle(color: AppColors.text.withOpacity(0.6)),
                     ),
                     TextButton(
                       onPressed: () {

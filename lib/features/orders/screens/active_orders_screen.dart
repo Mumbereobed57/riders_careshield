@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants.dart';
+import '../../../core/theme.dart';
 import '../../../core/widgets/loading_indicator.dart';
 import '../../../core/widgets/error_widget.dart';
 import '../../../models/order.dart';
@@ -9,17 +11,15 @@ import '../../../services/phone_service.dart';
 
 class ActiveOrdersScreen extends StatefulWidget {
   final bool showAppBar;
-  
-  const ActiveOrdersScreen({
-    super.key,
-    this.showAppBar = true,
-  });
+
+  const ActiveOrdersScreen({super.key, this.showAppBar = true});
 
   @override
   State<ActiveOrdersScreen> createState() => _ActiveOrdersScreenState();
 }
 
-class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> with AutomaticKeepAliveClientMixin {
+class _ActiveOrdersScreenState extends State<ActiveOrdersScreen>
+    with AutomaticKeepAliveClientMixin {
   @override
   bool get wantKeepAlive => true;
 
@@ -69,7 +69,8 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> with AutomaticK
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
               content: Text(
-                  'Order delivered! +${order.formattedDeliveryFee} earned'),
+                'Order delivered! +${order.formattedDeliveryFee} earned',
+              ),
               backgroundColor: AppColors.secondaryGreen,
             ),
           );
@@ -90,45 +91,48 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> with AutomaticK
   @override
   Widget build(BuildContext context) {
     super.build(context); // Required for AutomaticKeepAliveClientMixin
-    
-    final body = Consumer<OrdersProvider>(
-      builder: (context, ordersProvider, _) {
-        if (ordersProvider.isLoadingAccepted &&
-            ordersProvider.acceptedOrders.isEmpty) {
-          return const LoadingIndicator(message: 'Loading deliveries...');
-        }
 
-        if (ordersProvider.error != null &&
-            ordersProvider.acceptedOrders.isEmpty) {
-          return ErrorDisplay(
-            message: ordersProvider.error!,
-            onRetry: _loadActiveOrders,
+    final body = Container(
+      color: AppColors.background,
+      child: Consumer<OrdersProvider>(
+        builder: (context, ordersProvider, _) {
+          if (ordersProvider.isLoadingAccepted &&
+              ordersProvider.acceptedOrders.isEmpty) {
+            return const LoadingIndicator(message: 'Loading deliveries...');
+          }
+
+          if (ordersProvider.error != null &&
+              ordersProvider.acceptedOrders.isEmpty) {
+            return ErrorDisplay(
+              message: ordersProvider.error!,
+              onRetry: _loadActiveOrders,
+            );
+          }
+
+          if (ordersProvider.acceptedOrders.isEmpty) {
+            return EmptyState(
+              icon: Icons.delivery_dining,
+              title: 'No Active Deliveries',
+              message: 'Accept orders from the pending list to start earning',
+            );
+          }
+
+          return RefreshIndicator(
+            onRefresh: _loadActiveOrders,
+            child: ListView.builder(
+              padding: const EdgeInsets.all(16),
+              itemCount: ordersProvider.acceptedOrders.length,
+              itemBuilder: (context, index) {
+                final order = ordersProvider.acceptedOrders[index];
+                return _ActiveOrderCard(
+                  order: order,
+                  onMarkAsDelivered: () => _handleMarkAsDelivered(order),
+                );
+              },
+            ),
           );
-        }
-
-        if (ordersProvider.acceptedOrders.isEmpty) {
-          return EmptyState(
-            icon: Icons.delivery_dining,
-            title: 'No Active Deliveries',
-            message: 'Accept orders from the pending list to start earning',
-          );
-        }
-
-        return RefreshIndicator(
-          onRefresh: _loadActiveOrders,
-          child: ListView.builder(
-            padding: const EdgeInsets.all(24),
-            itemCount: ordersProvider.acceptedOrders.length,
-            itemBuilder: (context, index) {
-              final order = ordersProvider.acceptedOrders[index];
-              return _ActiveOrderCard(
-                order: order,
-                onMarkAsDelivered: () => _handleMarkAsDelivered(order),
-              );
-            },
-          ),
-        );
-      },
+        },
+      ),
     );
 
     if (widget.showAppBar) {
@@ -136,11 +140,14 @@ class _ActiveOrdersScreenState extends State<ActiveOrdersScreen> with AutomaticK
         backgroundColor: AppColors.background,
         appBar: AppBar(
           title: const Text('My Active Deliveries'),
+          systemOverlayStyle: getSystemUiOverlayStyle(
+            statusBarColor: AppColors.surface,
+          ),
         ),
         body: body,
       );
     }
-    
+
     return body;
   }
 }
@@ -218,10 +225,7 @@ class _ActiveOrderCard extends StatelessWidget {
                   color: AppColors.primaryBlue.withOpacity(0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
-                child: const Icon(
-                  Icons.person,
-                  color: AppColors.primaryBlue,
-                ),
+                child: const Icon(Icons.person, color: AppColors.primaryBlue),
               ),
               const SizedBox(width: 12),
               Expanded(
@@ -250,8 +254,9 @@ class _ActiveOrderCard extends StatelessWidget {
               // Call button
               GestureDetector(
                 onTap: () async {
-                  final success =
-                      await PhoneService.makePhoneCall(order.user.phone);
+                  final success = await PhoneService.makePhoneCall(
+                    order.user.phone,
+                  );
                   if (!success && context.mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(
@@ -275,10 +280,7 @@ class _ActiveOrderCard extends StatelessWidget {
                       ),
                     ],
                   ),
-                  child: const Icon(
-                    Icons.phone,
-                    color: Colors.white,
-                  ),
+                  child: const Icon(Icons.phone, color: Colors.white),
                 ),
               ),
             ],
@@ -349,7 +351,7 @@ class _ActiveOrderCard extends StatelessWidget {
                   Text(
                     order.formattedDeliveryFee,
                     style: const TextStyle(
-                      fontSize: 24,
+                      fontSize: 16,
                       fontWeight: FontWeight.w800,
                       color: AppColors.secondaryGreen,
                     ),
@@ -361,18 +363,17 @@ class _ActiveOrderCard extends StatelessWidget {
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppColors.secondaryGreen,
                   foregroundColor: Colors.white,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 18,
+                    vertical: 10,
+                  ),
                   shape: RoundedRectangleBorder(
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
                 child: const Text(
                   'Mark as Delivered',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w700,
-                  ),
+                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w700),
                 ),
               ),
             ],

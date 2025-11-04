@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../../../core/constants.dart';
+import '../../../core/theme.dart';
 import 'login_screen.dart';
 import 'signup_screen.dart';
 
@@ -8,6 +10,14 @@ class WelcomeScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Set status bar style for this screen
+    SystemChrome.setSystemUIOverlayStyle(
+      getSystemUiOverlayStyle(
+        statusBarColor: AppColors.primaryBlue,
+        statusBarIconBrightness: Brightness.light,
+      ),
+    );
+
     return Scaffold(
       body: Container(
         decoration: BoxDecoration(
@@ -95,10 +105,7 @@ class WelcomeScreen extends StatelessWidget {
                   ),
                   child: const Text(
                     'Get Started',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w700,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w700),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -122,10 +129,7 @@ class WelcomeScreen extends StatelessWidget {
                   ),
                   child: const Text(
                     'Sign In',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.w600,
-                    ),
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
                   ),
                 ),
                 const Spacer(),

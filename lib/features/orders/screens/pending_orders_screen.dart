@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../../../core/constants.dart';
+import '../../../core/theme.dart';
 import '../../../core/widgets/loading_indicator.dart';
 import '../../../core/widgets/error_widget.dart';
 import '../providers/orders_provider.dart';
@@ -39,10 +40,9 @@ class _PendingOrdersScreenState extends State<PendingOrdersScreen> {
   }
 
   void _showOrderDetails(BuildContext context, String orderId) {
-    final order = context
-        .read<OrdersProvider>()
-        .pendingOrders
-        .firstWhere((o) => o.id == orderId);
+    final order = context.read<OrdersProvider>().pendingOrders.firstWhere(
+      (o) => o.id == orderId,
+    );
 
     showModalBottomSheet(
       context: context,
@@ -58,6 +58,9 @@ class _PendingOrdersScreenState extends State<PendingOrdersScreen> {
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: const Text('Available Orders'),
+        systemOverlayStyle: getSystemUiOverlayStyle(
+          statusBarColor: AppColors.surface,
+        ),
         actions: [
           IconButton(
             icon: const Icon(Icons.refresh),
